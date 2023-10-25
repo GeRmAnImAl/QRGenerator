@@ -1,6 +1,8 @@
 package org.GeRmAnImAl.repository;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class QRCodeDAO {
 
@@ -52,6 +54,23 @@ public class QRCodeDAO {
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
+    }
+
+    public List<String> getAllQRCodes() {
+        List<String> qrCodes = new ArrayList<>();
+        String sql = "SELECT text FROM qr_codes";
+
+        try (Connection conn = this.databaseManager.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                qrCodes.add(rs.getString("text"));
+            }
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+        return qrCodes;
     }
 }
 
