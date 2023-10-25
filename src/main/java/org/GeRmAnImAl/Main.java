@@ -15,7 +15,7 @@ public class Main {
         QRCodeDAO qrCodeDAO = new QRCodeDAO(databaseManager);
 
         SwingUtilities.invokeLater(() -> {
-            QRGeneratorUI qrGeneratorUI = new QRGeneratorUI();
+            QRGeneratorUI qrGeneratorUI = new QRGeneratorUI(qrCodeDAO);
             qrGeneratorUI.setVisible(true);
         });
     }

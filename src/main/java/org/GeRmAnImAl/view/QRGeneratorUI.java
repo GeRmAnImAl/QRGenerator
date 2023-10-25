@@ -8,8 +8,11 @@ import com.google.zxing.qrcode.QRCodeWriter;
 import org.GeRmAnImAl.repository.QRCodeDAO;
 import org.GeRmAnImAl.service.QRGenerator;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.awt.image.BufferedImage;
 
@@ -52,6 +55,10 @@ public class QRGeneratorUI extends JFrame implements QRGenerator {
             BufferedImage qrImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
             ImageIcon icon = new ImageIcon(qrImage);
             qrCodeLabel.setIcon(icon);
+
+            byte[] qrCodeData = convertBufferedImageToByteArray(qrImage);
+            qrCodeDAO.insertQRCode(text, qrCodeData);
+            populateQRCodeList();
         } catch (WriterException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error generating QR code: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -64,5 +71,16 @@ public class QRGeneratorUI extends JFrame implements QRGenerator {
         for (String qrCode : qrCodes) {
             listModel.addElement(qrCode);
         }
+    }
+
+    public byte[] convertBufferedImageToByteArray(BufferedImage image) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            ImageIO.write(image, "png", baos);
+        } catch (IOException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error converting image: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        return baos.toByteArray();
     }
 }

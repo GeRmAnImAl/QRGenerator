@@ -9,15 +9,26 @@ public class DatabaseManager {
     private Connection connection;
 
     public DatabaseManager() {
-        try {
-            this.connection = DriverManager.getConnection("jdbc:sqlite:QRGenerator.db");
-        } catch (SQLException e){
-            System.err.println(e.getMessage());
-        }
+        connect();
     }
 
     public Connection getConnection() {
+        try {
+            if (connection == null || connection.isClosed()) {
+                connect();
+            }
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
         return connection;
+    }
+
+    private void connect() {
+        try {
+            connection = DriverManager.getConnection("jdbc:sqlite:QRGenerator.db");
+        } catch (SQLException e){
+            System.err.println(e.getMessage());
+        }
     }
 }
 
