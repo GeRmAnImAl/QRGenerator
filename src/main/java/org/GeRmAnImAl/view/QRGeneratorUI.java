@@ -23,6 +23,7 @@ import java.awt.image.BufferedImage;
 public class QRGeneratorUI extends JFrame implements QRGenerator {
     private JTextField textField;
     private JLabel qrCodeLabel;
+    private JLabel listQRCodes;
     private QRCodeDAO qrCodeDAO;
     private JList<String> qrCodeList;
     private DefaultListModel<String> listModel;
@@ -63,10 +64,10 @@ public class QRGeneratorUI extends JFrame implements QRGenerator {
             }
         });
 
-        qrCodeLabel = new JLabel();
-
-
         generateButton.addActionListener(e -> generateQRCode());
+
+        qrCodeLabel = new JLabel();
+        listQRCodes = new JLabel("Existing QR Codes: ");
 
         JPanel textPanel = new JPanel(new BorderLayout());
         textPanel.add(textField, BorderLayout.NORTH);
@@ -80,11 +81,22 @@ public class QRGeneratorUI extends JFrame implements QRGenerator {
 
         listModel = new DefaultListModel<>();
         qrCodeList = new JList<>(listModel);
+
+        qrCodeList.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {  // Only handle event once when selection is final
+                String selectedText = qrCodeList.getSelectedValue();
+                if (selectedText != null) {
+                    displayQRCode(selectedText);
+                }
+            }
+        });
+
         JPanel listPanel = new JPanel(new BorderLayout());
         JScrollPane scrollPane = new JScrollPane(qrCodeList);
         scrollPane.setMaximumSize(new Dimension(452, 300));
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        listPanel.add(listQRCodes, BorderLayout.NORTH);
         listPanel.add(scrollPane, BorderLayout.CENTER);
         add(listPanel, BorderLayout.SOUTH);
 
@@ -98,13 +110,18 @@ public class QRGeneratorUI extends JFrame implements QRGenerator {
             BitMatrix bitMatrix = qrCodeWriter.encode(text, BarcodeFormat.QR_CODE, 200, 200);
             BufferedImage qrImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
             ImageIcon icon = new ImageIcon(qrImage);
-            qrCodeLabel.setIcon(icon);
 
             byte[] qrCodeData = convertBufferedImageToByteArray(qrImage);
-            qrCodeDAO.insertQRCode(text, qrCodeData);
-            populateQRCodeList();
 
-            System.out.println(getSize());
+            boolean insertSuccessful = qrCodeDAO.insertQRCode(text, qrCodeData);
+            if(!insertSuccessful){
+                JOptionPane.showMessageDialog(this, "A QR Code Already Exists For This URL.",
+                        "Duplicate URL", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            qrCodeLabel.setIcon(icon);
+            populateQRCodeList();
         } catch (WriterException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error generating QR code: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -128,6 +145,16 @@ public class QRGeneratorUI extends JFrame implements QRGenerator {
             JOptionPane.showMessageDialog(this, "Error converting image: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
         return baos.toByteArray();
+    }
+
+    private void displayQRCode(String text) {
+        byte[] qrCodeData = qrCodeDAO.queryQRCode(text);
+        if (qrCodeData != null) {
+            ImageIcon icon = new ImageIcon(qrCodeData);
+            qrCodeLabel.setIcon(icon);
+        } else {
+            JOptionPane.showMessageDialog(this, "QR code data not found for: " + text, "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     @Override

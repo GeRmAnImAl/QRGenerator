@@ -12,32 +12,45 @@ public class QRCodeDAO {
         this.databaseManager = databaseManager;
     }
 
-    public void insertQRCode(String text, byte[] qrCodeData) {
+    public boolean insertQRCode(String text, byte[] qrCodeData) {
         try (Connection conn = this.databaseManager.getConnection()) {
             if (conn == null || conn.isClosed()) {
                 System.err.println("Connection is closed");
-                return;
+                return false;
             }
+
+            String checkSql = "SELECT COUNT(*) FROM qr_codes WHERE text = ?";
+            try (PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
+                checkStmt.setString(1, text);
+                ResultSet rs = checkStmt.executeQuery();
+                if (rs.next() && rs.getInt(1) > 0) {
+                    // QR code with specified text already exists
+                    return false;
+                }
+            }
+
             String sql = "INSERT INTO qr_codes(text, qr_code_data) VALUES(?,?)";
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setString(1, text);
                 pstmt.setBytes(2, qrCodeData);
                 pstmt.executeUpdate();
+                return true;
             }
         } catch (SQLException e) {
             System.err.println(e.getMessage());
+            return false;
         }
     }
 
-    public byte[] queryQRCode(int id) {
+    public byte[] queryQRCode(String text) {
         try (Connection conn = this.databaseManager.getConnection()) {
             if (conn == null || conn.isClosed()) {
                 System.err.println("Connection is closed");
                 return null;
             }
-            String sql = "SELECT qr_code_data FROM qr_codes WHERE id = ?";
+            String sql = "SELECT qr_code_data FROM qr_codes WHERE text = ?";
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setInt(1, id);
+                pstmt.setString(1, text);
                 ResultSet rs = pstmt.executeQuery();
                 if (rs.next()) {
                     return rs.getBytes("qr_code_data");
