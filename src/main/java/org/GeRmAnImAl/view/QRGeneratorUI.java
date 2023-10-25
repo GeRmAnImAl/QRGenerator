@@ -32,13 +32,15 @@ public class QRGeneratorUI extends JFrame implements QRGenerator {
         this.qrCodeDAO = qrCodeDAO;
         this.databaseManager = databaseManager;
         setTitle("QR Code Generator");
-        setSize(400, 400);
+        setPreferredSize(new Dimension(452, 466));
+        pack();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
         textField = new JTextField();
         textField.setText("Enter the URL Here");
         JButton generateButton = new JButton("Generate QR Code");
+        generateButton.setPreferredSize(new Dimension(452, 50));
         generateButton.setEnabled(false);
         textField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -63,23 +65,27 @@ public class QRGeneratorUI extends JFrame implements QRGenerator {
 
         qrCodeLabel = new JLabel();
 
+
         generateButton.addActionListener(e -> generateQRCode());
 
-        // Create a panel to hold the qrCodeLabel and the generateButton
-        JPanel qrPanel = new JPanel();
-        qrPanel.setLayout(new BorderLayout());
-        qrPanel.add(qrCodeLabel, BorderLayout.NORTH);
-        qrPanel.add(generateButton, BorderLayout.CENTER);
+        JPanel textPanel = new JPanel(new BorderLayout());
+        textPanel.add(textField, BorderLayout.NORTH);
+        textPanel.add(qrCodeLabel, BorderLayout.SOUTH);
 
-        // Set the main layout and add components
-        setLayout(new BorderLayout());
-        add(textField, BorderLayout.NORTH);
-        add(qrPanel, BorderLayout.CENTER);
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(generateButton, BorderLayout.CENTER);
+
+        add(textPanel, BorderLayout.NORTH);
+        add(buttonPanel, BorderLayout.CENTER);
 
         listModel = new DefaultListModel<>();
         qrCodeList = new JList<>(listModel);
         JPanel listPanel = new JPanel(new BorderLayout());
-        listPanel.add(new JScrollPane(qrCodeList), BorderLayout.NORTH);
+        JScrollPane scrollPane = new JScrollPane(qrCodeList);
+        scrollPane.setMaximumSize(new Dimension(452, 300));
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        listPanel.add(scrollPane, BorderLayout.CENTER);
         add(listPanel, BorderLayout.SOUTH);
 
         populateQRCodeList();
@@ -98,8 +104,7 @@ public class QRGeneratorUI extends JFrame implements QRGenerator {
             qrCodeDAO.insertQRCode(text, qrCodeData);
             populateQRCodeList();
 
-            pack();
-            setLocationRelativeTo(null);
+            System.out.println(getSize());
         } catch (WriterException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error generating QR code: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
