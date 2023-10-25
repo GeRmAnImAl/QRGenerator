@@ -30,5 +30,16 @@ public class DatabaseManager {
             System.err.println(e.getMessage());
         }
     }
+
+    public void closeConnection() {
+        try {
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+                connection = null;  // Optionally set connection to null after closing
+            }
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+    }
 }
 

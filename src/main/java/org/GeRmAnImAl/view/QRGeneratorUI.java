@@ -5,12 +5,14 @@ import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
+import org.GeRmAnImAl.repository.DatabaseManager;
 import org.GeRmAnImAl.repository.QRCodeDAO;
 import org.GeRmAnImAl.service.QRGenerator;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowEvent;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
@@ -22,9 +24,11 @@ public class QRGeneratorUI extends JFrame implements QRGenerator {
     private QRCodeDAO qrCodeDAO;
     private JList<String> qrCodeList;
     private DefaultListModel<String> listModel;
+    private DatabaseManager databaseManager;
 
-    public QRGeneratorUI(QRCodeDAO qrCodeDAO) {
+    public QRGeneratorUI(QRCodeDAO qrCodeDAO, DatabaseManager databaseManager) {
         this.qrCodeDAO = qrCodeDAO;
+        this.databaseManager = databaseManager;
         setTitle("QR Code Generator");
         setSize(400, 400);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -82,5 +86,13 @@ public class QRGeneratorUI extends JFrame implements QRGenerator {
             JOptionPane.showMessageDialog(this, "Error converting image: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
         return baos.toByteArray();
+    }
+
+    @Override
+    protected void processWindowEvent(WindowEvent e) {
+        super.processWindowEvent(e);
+        if (e.getID() == WindowEvent.WINDOW_CLOSING) {
+            databaseManager.closeConnection();
+        }
     }
 }
