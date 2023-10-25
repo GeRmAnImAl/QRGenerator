@@ -80,6 +80,24 @@ public class QRCodeDAO {
         }
     }
 
+    public boolean deleteQRCode(String text) {
+        try (Connection conn = this.databaseManager.getConnection()) {
+            if (conn == null || conn.isClosed()) {
+                System.err.println("Connection is closed");
+                return false;
+            }
+            String sql = "DELETE FROM qr_codes WHERE text = ?";
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setString(1, text);
+                int rowsAffected = pstmt.executeUpdate();
+                return rowsAffected > 0;
+            }
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+            return false;
+        }
+    }
+
     public List<String> getAllQRCodes() {
         List<String> qrCodes = new ArrayList<>();
         try (Connection conn = this.databaseManager.getConnection()) {

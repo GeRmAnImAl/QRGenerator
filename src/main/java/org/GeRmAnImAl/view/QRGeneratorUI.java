@@ -22,6 +22,7 @@ import java.awt.image.BufferedImage;
 
 public class QRGeneratorUI extends JFrame implements QRGenerator {
     private JTextField textField;
+    private JLabel urlHeader;
     private JLabel qrCodeLabel;
     private JLabel listQRCodes;
     private QRCodeDAO qrCodeDAO;
@@ -33,7 +34,7 @@ public class QRGeneratorUI extends JFrame implements QRGenerator {
         this.qrCodeDAO = qrCodeDAO;
         this.databaseManager = databaseManager;
         setTitle("QR Code Generator");
-        setPreferredSize(new Dimension(452, 466));
+        setPreferredSize(new Dimension(452, 470));
         pack();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -41,7 +42,6 @@ public class QRGeneratorUI extends JFrame implements QRGenerator {
         textField = new JTextField();
         textField.setText("Enter the URL Here");
         JButton generateButton = new JButton("Generate QR Code");
-        generateButton.setPreferredSize(new Dimension(452, 50));
         generateButton.setEnabled(false);
         textField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -66,15 +66,24 @@ public class QRGeneratorUI extends JFrame implements QRGenerator {
 
         generateButton.addActionListener(e -> generateQRCode());
 
+        JButton deleteButton = new JButton("Delete Selected QR Code");
+        deleteButton.addActionListener(e -> deleteSelectedQRCode());
+
+        urlHeader = new JLabel("URL:");
         qrCodeLabel = new JLabel();
         listQRCodes = new JLabel("Existing QR Codes: ");
 
+        JPanel qrCodePanel = new JPanel(new GridBagLayout());
+        qrCodePanel.add(qrCodeLabel);
+
         JPanel textPanel = new JPanel(new BorderLayout());
-        textPanel.add(textField, BorderLayout.NORTH);
-        textPanel.add(qrCodeLabel, BorderLayout.SOUTH);
+        textPanel.add(urlHeader, BorderLayout.NORTH);
+        textPanel.add(textField, BorderLayout.CENTER);
+        textPanel.add(qrCodePanel, BorderLayout.SOUTH);
 
         JPanel buttonPanel = new JPanel();
-        buttonPanel.add(generateButton, BorderLayout.CENTER);
+        buttonPanel.add(generateButton, BorderLayout.NORTH);
+        buttonPanel.add(deleteButton, BorderLayout.SOUTH);
 
         add(textPanel, BorderLayout.NORTH);
         add(buttonPanel, BorderLayout.CENTER);
@@ -128,6 +137,21 @@ public class QRGeneratorUI extends JFrame implements QRGenerator {
         }
     }
 
+    public void deleteSelectedQRCode() {
+        String selectedText = qrCodeList.getSelectedValue();
+        if (selectedText != null) {
+            boolean deletionSuccessful = qrCodeDAO.deleteQRCode(selectedText);
+            if (deletionSuccessful) {
+                populateQRCodeList();  // Refresh the list
+                qrCodeLabel.setIcon(null);  // Clear the displayed QR code
+            } else {
+                JOptionPane.showMessageDialog(this, "Error deleting QR code.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "No QR code selected.", "Error", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
     public void populateQRCodeList(){
         List<String> qrCodes = qrCodeDAO.getAllQRCodes();
         listModel.clear();
@@ -147,7 +171,7 @@ public class QRGeneratorUI extends JFrame implements QRGenerator {
         return baos.toByteArray();
     }
 
-    private void displayQRCode(String text) {
+    public void displayQRCode(String text) {
         byte[] qrCodeData = qrCodeDAO.queryQRCode(text);
         if (qrCodeData != null) {
             ImageIcon icon = new ImageIcon(qrCodeData);
