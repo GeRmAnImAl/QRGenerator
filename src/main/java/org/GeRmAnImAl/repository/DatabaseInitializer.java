@@ -19,7 +19,7 @@ public class DatabaseInitializer {
                 + "    qr_code_data blob NOT NULL\n"
                 + ");";
 
-        try (Connection conn = databaseManager.connect();
+        try (Connection conn = databaseManager.getConnection();
              Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
         } catch (SQLException e) {

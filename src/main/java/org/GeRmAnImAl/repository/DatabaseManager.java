@@ -6,15 +6,18 @@ import java.sql.SQLException;
 
 public class DatabaseManager {
 
-    public Connection connect() {
-        Connection conn = null;
+    private Connection connection;
+
+    public DatabaseManager() {
         try {
-            String URL = "jdbc:sqlite:QRGenerator.db";
-            conn = DriverManager.getConnection(URL);
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            this.connection = DriverManager.getConnection("jdbc:sqlite:QRGenerator.db");
+        } catch (SQLException e){
+            System.err.println(e.getMessage());
         }
-        return conn;
+    }
+
+    public Connection getConnection() {
+        return connection;
     }
 }
 

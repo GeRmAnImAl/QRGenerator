@@ -13,7 +13,7 @@ public class QRCodeDAO {
     public void insertQRCode(String text, byte[] qrCodeData) {
         String sql = "INSERT INTO qr_codes(text, qr_code_data) VALUES(?,?)";
 
-        try (Connection conn = this.databaseManager.connect();
+        try (Connection conn = this.databaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, text);
             pstmt.setBytes(2, qrCodeData);
@@ -26,7 +26,7 @@ public class QRCodeDAO {
     public byte[] queryQRCode(int id) {
         String sql = "SELECT qr_code_data FROM qr_codes WHERE id = ?";
 
-        try (Connection conn = this.databaseManager.connect();
+        try (Connection conn = this.databaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
             ResultSet rs = pstmt.executeQuery();
@@ -43,7 +43,7 @@ public class QRCodeDAO {
     public void updateQRCode(int id, String newText, byte[] newQRCodeData) {
         String sql = "UPDATE qr_codes SET text = ?, qr_code_data = ? WHERE id = ?";
 
-        try (Connection conn = this.databaseManager.connect();
+        try (Connection conn = this.databaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, newText);
             pstmt.setBytes(2, newQRCodeData);
