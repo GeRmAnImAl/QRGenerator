@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"org.GeRmAnImAl"},{"l":"org.GeRmAnImAl.model"},{"l":"org.GeRmAnImAl.repository"},{"l":"org.GeRmAnImAl.service"},{"l":"org.GeRmAnImAl.view"}];updateSearchResults();
