@@ -8,17 +8,20 @@ import com.google.zxing.qrcode.QRCodeWriter;
 import org.GeRmAnImAl.model.QRCode;
 import org.GeRmAnImAl.repository.DatabaseManager;
 import org.GeRmAnImAl.repository.QRCodeDAO;
+import org.GeRmAnImAl.service.ImageSelection;
 import org.GeRmAnImAl.service.QRGenerator;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.WindowEvent;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.awt.image.BufferedImage;
@@ -36,6 +39,9 @@ public class QRGeneratorUI extends JFrame implements QRGenerator {
     private JList<String> qrCodeList;
     private DefaultListModel<String> listModel;
     private final DatabaseManager databaseManager;
+    private JPopupMenu contextMenu;
+    private JMenuItem copyMenuItem;
+    private JMenuItem saveMenuItem;
 
     /**
      * Constructor for QRGeneratorUI class.
@@ -56,8 +62,15 @@ public class QRGeneratorUI extends JFrame implements QRGenerator {
         initializeQRCodeLabel();
         initializeQRCodeList();
         initializeListPanel();
+        initializeQRCodeLabel();
+        initializeContextMenu();
     }
 
+    /**
+     * Initializes the text field for URL input with a placeholder text.
+     * It sets up focus listeners to handle the appearance of placeholder text
+     * when the text field gains or loses focus.
+     */
     public void initializeTextField(){
         textField = new JTextField();
         textField.setText("Enter the URL Here");
@@ -91,6 +104,11 @@ public class QRGeneratorUI extends JFrame implements QRGenerator {
         });
     }
 
+    /**
+     * Initializes the buttons for generating and deleting QR Codes.
+     * It sets up action listeners for button clicks and a document listener
+     * on the text field to enable or disable the generate button based on text field content.
+     */
     public void initializeButtons(){
         JButton generateButton = new JButton("Generate QR Code");
         generateButton.setEnabled(false);
@@ -143,6 +161,10 @@ public class QRGeneratorUI extends JFrame implements QRGenerator {
         generateButton.requestFocusInWindow();
     }
 
+    /**
+     * Initializes the QR code label and arranges the UI components within a panel.
+     * This method sets up the UI layout for displaying the URL header, text field, and QR code label.
+     */
     public void initializeQRCodeLabel(){
         qrCodeLabel = new JLabel();
         urlHeader = new JLabel("URL:");
@@ -157,6 +179,12 @@ public class QRGeneratorUI extends JFrame implements QRGenerator {
         add(textPanel, BorderLayout.NORTH);
     }
 
+    /**
+     * Initializes the list component used for displaying the existing QR codes.
+     * This method sets up a JList with a DefaultListModel and adds a ListSelectionListener
+     * to the list to handle item selection events. When a list item is selected,
+     * the corresponding QR code is displayed.
+     */
     public void initializeQRCodeList(){
         listModel = new DefaultListModel<>();
         qrCodeList = new JList<>(listModel);
@@ -171,6 +199,12 @@ public class QRGeneratorUI extends JFrame implements QRGenerator {
         });
     }
 
+    /**
+     * Initializes the panel that contains the list of existing QR codes.
+     * This method sets up a JPanel with a BorderLayout, creates a JScrollPane containing
+     * the QR code list, and adds these components to the panel. Additionally, it calls
+     * the method to populate the QR code list from the database.
+     */
     public void initializeListPanel(){
         listQRCodes = new JLabel("Existing QR Codes: ");
         JPanel listPanel = new JPanel(new BorderLayout());
@@ -183,6 +217,50 @@ public class QRGeneratorUI extends JFrame implements QRGenerator {
         add(listPanel, BorderLayout.SOUTH);
 
         populateQRCodeList();
+    }
+
+
+    public void initializeContextMenu() {
+        contextMenu = new JPopupMenu();
+        copyMenuItem = new JMenuItem("Copy Image");
+        saveMenuItem = new JMenuItem("Save Image");
+
+        contextMenu.add(copyMenuItem);
+        contextMenu.add(saveMenuItem);
+
+        qrCodeLabel.setComponentPopupMenu(contextMenu);
+
+        setupContextMenuActions();
+    }
+
+    private void setupContextMenuActions() {
+        copyMenuItem.addActionListener(e -> {
+            ImageIcon icon = (ImageIcon) qrCodeLabel.getIcon();
+            if (icon != null) {
+                BufferedImage image = (BufferedImage) icon.getImage();
+                ImageSelection imgSel = new ImageSelection(image);
+                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(imgSel, null);
+            }
+        });
+
+        saveMenuItem.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setFileFilter(new FileNameExtensionFilter("PNG Images", "png"));
+            int userSelection = fileChooser.showSaveDialog(QRGeneratorUI.this);
+            if (userSelection == JFileChooser.APPROVE_OPTION) {
+                File fileToSave = fileChooser.getSelectedFile();
+                ImageIcon icon = (ImageIcon) qrCodeLabel.getIcon();
+                if (icon != null) {
+                    BufferedImage image = (BufferedImage) icon.getImage();
+                    try {
+                        ImageIO.write(image, "png", new File(fileToSave.getAbsolutePath() + ".png"));
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
+                    }
+                }
+            }
+        });
+
     }
 
     /**
