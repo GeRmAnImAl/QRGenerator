@@ -61,18 +61,18 @@ public class QRCodeDAO {
      * @param text the text for which the QR code data is to be queried
      * @return the QR code data as a byte array, or null if not found
      */
-    public byte[] queryQRCode(String text) {
+    public QRCode queryQRCode(String text) {
         try (Connection conn = this.databaseManager.getConnection()) {
             if (conn == null || conn.isClosed()) {
                 System.err.println("Connection is closed");
                 return null;
             }
-            String sql = "SELECT qr_code_data FROM qr_codes WHERE text = ?";
+            String sql = "SELECT text, qr_code_data FROM qr_codes WHERE text = ?";
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setString(1, text);
                 ResultSet rs = pstmt.executeQuery();
                 if (rs.next()) {
-                    return rs.getBytes("qr_code_data");
+                    return new QRCode(rs.getString("text"), rs.getBytes("qr_code_data"));
                 }
             }
         } catch (SQLException e) {
@@ -110,7 +110,7 @@ public class QRCodeDAO {
      * @param text the text of the QR code to be deleted
      * @return true if the deletion is successful, false otherwise
      */
-    public boolean deleteQRCode(String text) {
+    public boolean deleteQRCode(QRCode qrCode) {
         try (Connection conn = this.databaseManager.getConnection()) {
             if (conn == null || conn.isClosed()) {
                 System.err.println("Connection is closed");
@@ -118,7 +118,7 @@ public class QRCodeDAO {
             }
             String sql = "DELETE FROM qr_codes WHERE text = ?";
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setString(1, text);
+                pstmt.setString(1, qrCode.getUrl());
                 int rowsAffected = pstmt.executeUpdate();
                 return rowsAffected > 0;
             }

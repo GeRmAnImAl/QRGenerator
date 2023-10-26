@@ -1,5 +1,10 @@
 package org.GeRmAnImAl.model;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 /**
  * Represents a QR code with associated URL.
  */
@@ -47,5 +52,16 @@ public class QRCode {
      */
     public void setQrCodeData(byte[] qrCodeData) {
         this.qrCodeData = qrCodeData;
+    }
+
+    public static byte[] convertBufferedImageToByteArray(BufferedImage image) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            ImageIO.write(image, "png", baos);
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Handle the exception accordingly
+        }
+        return baos.toByteArray();
     }
 }
