@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class QRCodeDAO {
 
-    private DatabaseManager databaseManager;
+    private final DatabaseManager databaseManager;
 
     /**
      * Constructs a QRCodeDAO with the specified DatabaseManager.
@@ -106,9 +106,9 @@ public class QRCodeDAO {
     }
 
     /**
-     * Deletes a QR code from the database based on the specified text.
-     * @param text the text of the QR code to be deleted
-     * @return true if the deletion is successful, false otherwise
+     * Deletes a QR code from the database based on the specified QRCode object.
+     * @param qrCode the QRCode object containing the URL to identify the QR code to be deleted
+     * @return true if the deletion is successful and at least one row was affected, false otherwise
      */
     public boolean deleteQRCode(QRCode qrCode) {
         try (Connection conn = this.databaseManager.getConnection()) {

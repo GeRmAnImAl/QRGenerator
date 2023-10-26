@@ -9,7 +9,5 @@ public interface QRGenerator {
 
     public void populateQRCodeList();
 
-    public byte[] convertBufferedImageToByteArray(BufferedImage image);
-
     public void displayQRCode(String text);
 }

@@ -54,6 +54,11 @@ public class QRCode {
         this.qrCodeData = qrCodeData;
     }
 
+    /**
+     * Converts a BufferedImage to a byte array.
+     * @param image the BufferedImage to be converted
+     * @return byte array representation of the image
+     */
     public static byte[] convertBufferedImageToByteArray(BufferedImage image) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {

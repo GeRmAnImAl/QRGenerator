@@ -32,10 +32,10 @@ public class QRGeneratorUI extends JFrame implements QRGenerator {
     private JLabel urlHeader;
     private JLabel qrCodeLabel;
     private JLabel listQRCodes;
-    private QRCodeDAO qrCodeDAO;
+    private final QRCodeDAO qrCodeDAO;
     private JList<String> qrCodeList;
     private DefaultListModel<String> listModel;
-    private DatabaseManager databaseManager;
+    private final DatabaseManager databaseManager;
 
     /**
      * Constructor for QRGeneratorUI class.
@@ -161,9 +161,6 @@ public class QRGeneratorUI extends JFrame implements QRGenerator {
         listModel = new DefaultListModel<>();
         qrCodeList = new JList<>(listModel);
 
-        /**
-         * Invoked when a list selection event occurs.
-         */
         qrCodeList.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {  // Only handle event once when selection is final
                 String selectedText = qrCodeList.getSelectedValue();
@@ -199,7 +196,7 @@ public class QRGeneratorUI extends JFrame implements QRGenerator {
             BufferedImage qrImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
             ImageIcon icon = new ImageIcon(qrImage);
 
-            byte[] qrCodeData = convertBufferedImageToByteArray(qrImage);
+            byte[] qrCodeData = QRCode.convertBufferedImageToByteArray(qrImage);
 
             QRCode qrCode = new QRCode(text, qrCodeData);
 
@@ -250,22 +247,6 @@ public class QRGeneratorUI extends JFrame implements QRGenerator {
         for (String qrCode : qrCodes) {
             listModel.addElement(qrCode);
         }
-    }
-
-    /**
-     * Converts a BufferedImage to a byte array.
-     * @param image the BufferedImage to be converted
-     * @return byte array representation of the image
-     */
-    public byte[] convertBufferedImageToByteArray(BufferedImage image) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            ImageIO.write(image, "png", baos);
-        } catch (IOException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error converting image: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-        return baos.toByteArray();
     }
 
     /**
