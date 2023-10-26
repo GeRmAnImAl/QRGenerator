@@ -219,7 +219,12 @@ public class QRGeneratorUI extends JFrame implements QRGenerator {
         populateQRCodeList();
     }
 
-
+    /**
+     * Initializes the context menu with "Copy Image" and "Save Image" options.
+     * This method creates a new JPopupMenu and associates it with the qrCodeLabel,
+     * so that the menu is displayed when the user right-clicks on the label.
+     * It also initializes the actions to be taken when the menu items are selected.
+     */
     public void initializeContextMenu() {
         contextMenu = new JPopupMenu();
         copyMenuItem = new JMenuItem("Copy Image");
@@ -233,6 +238,11 @@ public class QRGeneratorUI extends JFrame implements QRGenerator {
         setupContextMenuActions();
     }
 
+    /**
+     * Sets up the actions to be performed when the user selects the options from the context menu.
+     * This method specifies the behavior for copying the image to the system clipboard
+     * and saving the image to a file when the respective menu items are selected.
+     */
     private void setupContextMenuActions() {
         copyMenuItem.addActionListener(e -> {
             ImageIcon icon = (ImageIcon) qrCodeLabel.getIcon();
