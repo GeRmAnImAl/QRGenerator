@@ -1,18 +1,32 @@
 package org.GeRmAnImAl.repository;
 
+import org.GeRmAnImAl.model.QRCode;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Data Access Object (DAO) for managing QRCode data in a database.
+ */
 public class QRCodeDAO {
 
     private DatabaseManager databaseManager;
 
+    /**
+     * Constructs a QRCodeDAO with the specified DatabaseManager.
+     * @param databaseManager the database manager for managing database connections
+     */
     public QRCodeDAO(DatabaseManager databaseManager) {
         this.databaseManager = databaseManager;
     }
 
-    public boolean insertQRCode(String text, byte[] qrCodeData) {
+    /**
+     * Inserts a new QR code into the database.
+     * @param qrCode the QRCode object containing the data to be inserted
+     * @return true if the insertion is successful, false otherwise
+     */
+    public boolean insertQRCode(QRCode qrCode) {
         try (Connection conn = this.databaseManager.getConnection()) {
             if (conn == null || conn.isClosed()) {
                 System.err.println("Connection is closed");
@@ -21,7 +35,7 @@ public class QRCodeDAO {
 
             String checkSql = "SELECT COUNT(*) FROM qr_codes WHERE text = ?";
             try (PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
-                checkStmt.setString(1, text);
+                checkStmt.setString(1, qrCode.getUrl());
                 ResultSet rs = checkStmt.executeQuery();
                 if (rs.next() && rs.getInt(1) > 0) {
                     // QR code with specified text already exists
@@ -31,8 +45,8 @@ public class QRCodeDAO {
 
             String sql = "INSERT INTO qr_codes(text, qr_code_data) VALUES(?,?)";
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setString(1, text);
-                pstmt.setBytes(2, qrCodeData);
+                pstmt.setString(1, qrCode.getUrl());
+                pstmt.setBytes(2, qrCode.getQrCodeData());
                 pstmt.executeUpdate();
                 return true;
             }
@@ -42,6 +56,11 @@ public class QRCodeDAO {
         }
     }
 
+    /**
+     * Queries the database for the QR code data of a specified text.
+     * @param text the text for which the QR code data is to be queried
+     * @return the QR code data as a byte array, or null if not found
+     */
     public byte[] queryQRCode(String text) {
         try (Connection conn = this.databaseManager.getConnection()) {
             if (conn == null || conn.isClosed()) {
@@ -62,6 +81,12 @@ public class QRCodeDAO {
         return null;
     }
 
+    /**
+     * Updates the QR code data and text of an existing QR code in the database.
+     * @param id the ID of the QR code to be updated
+     * @param newText the new text for the QR code
+     * @param newQRCodeData the new QR code data
+     */
     public void updateQRCode(int id, String newText, byte[] newQRCodeData) {
         try (Connection conn = this.databaseManager.getConnection()) {
             if (conn == null || conn.isClosed()) {
@@ -80,6 +105,11 @@ public class QRCodeDAO {
         }
     }
 
+    /**
+     * Deletes a QR code from the database based on the specified text.
+     * @param text the text of the QR code to be deleted
+     * @return true if the deletion is successful, false otherwise
+     */
     public boolean deleteQRCode(String text) {
         try (Connection conn = this.databaseManager.getConnection()) {
             if (conn == null || conn.isClosed()) {
@@ -98,6 +128,10 @@ public class QRCodeDAO {
         }
     }
 
+    /**
+     * Retrieves all QR codes from the database.
+     * @return a List of String representing the texts of all QR codes in the database
+     */
     public List<String> getAllQRCodes() {
         List<String> qrCodes = new ArrayList<>();
         try (Connection conn = this.databaseManager.getConnection()) {

@@ -14,6 +14,11 @@ public class Main {
         databaseInitializer.createNewTable();
         QRCodeDAO qrCodeDAO = new QRCodeDAO(databaseManager);
 
+        /**
+         * Schedule the creation and display of the QRGeneratorUI
+         * instance on the Event Dispatch Thread to ensure thread-safety
+         * in Swing operations.
+         */
         SwingUtilities.invokeLater(() -> {
             QRGeneratorUI qrGeneratorUI = new QRGeneratorUI(qrCodeDAO, databaseManager);
             qrGeneratorUI.setVisible(true);

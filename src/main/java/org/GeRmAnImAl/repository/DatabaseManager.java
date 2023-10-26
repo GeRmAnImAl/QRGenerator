@@ -4,14 +4,24 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+/**
+ * Manages database connection and disconnection operations.
+ */
 public class DatabaseManager {
 
     private Connection connection;
 
+    /**
+     * Constructor for DatabaseManager. Initiates a database connection.
+     */
     public DatabaseManager() {
         connect();
     }
 
+    /**
+     * Retrieves the current database connection, establishing a new connection if necessary.
+     * @return the current database Connection object
+     */
     public Connection getConnection() {
         try {
             if (connection == null || connection.isClosed()) {
@@ -23,6 +33,9 @@ public class DatabaseManager {
         return connection;
     }
 
+    /**
+     * Establishes a new database connection.
+     */
     private void connect() {
         try {
             connection = DriverManager.getConnection("jdbc:sqlite:QRGenerator.db");
@@ -31,6 +44,9 @@ public class DatabaseManager {
         }
     }
 
+    /**
+     * Closes the current database connection if it is open.
+     */
     public void closeConnection() {
         try {
             if (connection != null && !connection.isClosed()) {
